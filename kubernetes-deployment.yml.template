@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rest-simpleapp
+  labels:
+    run: rest-simpleapp
+spec:
+  selector:
+    matchLabels:
+      app: rest-simpleapp
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: rest-simpleapp
+    spec:
+      containers:
+      - image: nginx
+        imagePullPolicy: Always
+        name: rest-simpleapp
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+      imagePullSecrets:
+      - name: wrelease
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rest-simpleapp-svc
+spec:
+  selector:
+    run: rest-simpleapp
+  ports:
+    - port: 8088
+      targetPort: 3000
+type: ClusterIP
